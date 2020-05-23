@@ -3,6 +3,8 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
+import { web3Accounts, web3Enable, web3FromAddress } from '@polkadot/extension-dapp';
+
 
 ReactDOM.render(
   <React.StrictMode>
