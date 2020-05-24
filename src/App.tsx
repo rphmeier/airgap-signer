@@ -1,15 +1,16 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, FormEvent } from 'react';
 import logo from './logo.svg';
 import './App.css';
 import { InjectedExtension, InjectedAccount } from '@polkadot/extension-inject/types';
 import { web3Accounts, web3Enable, web3FromAddress } from '@polkadot/extension-dapp';
+import { AssertionError } from 'assert';
 
 const APP_NAME: string = "Airgap-Signer";
 
 function App() {
   const [injected, setInjected] = useState([] as InjectedExtension[]);
 
-  useEffect(() => { web3Enable(APP_NAME).then(i => setInjected(i))}, [injected]);
+  useEffect(() => { web3Enable(APP_NAME).then(i => setInjected(i))}, []);
 
   if (injected.length == 0) {
     return <p>No injected signers, initializing?</p>
@@ -76,23 +77,54 @@ type ChooseAccountProps = {
 
 function ChooseAccount(props: ChooseAccountProps) {
   const [accounts, setAccounts] = useState([] as InjectedAccount[]);
+  const [selectValue, setSelectValue] = useState(-1);
 
   useEffect(() => {
     web3Accounts().then(accounts => setAccounts(accounts));
-  }, [accounts]);
+  }, []);
 
   if (accounts.length == 0) {
     return <p>No accounts known</p>
   }
 
-  let chooseFirstAccount = () => {
-    props.onAccountChosen(accounts[0]);
+  let accountSelectName = (account: InjectedAccount) => {
+    if (account.name) {
+      return account.name + " (" + account.address + ") ";
+    } else {
+      return account.address;
+    }
   }
+
+  let accountOptions = accounts.map((account, index) => {
+    let s = accountSelectName(account);
+    return <option value={index} key={index}>{s}</option>
+  });
+
+  let onChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectValue(parseInt(event.target.value));
+  };
+
+  let onSubmit = (event: FormEvent) => {
+    event.preventDefault();
+
+    if (selectValue >= accounts.length) {
+      return;
+    }
+
+    props.onAccountChosen(accounts[0]);
+  };
+
+  let disableSubmit = selectValue == -1;
   
   return (
     <div>
-      <p>Press to choose an account:</p>
-      <button onClick={chooseFirstAccount}>Choose</button>
+      <form onSubmit={onSubmit}>
+        <select onChange={onChange}>
+          <option value={-1} key="base">--Choose Account--</option>
+          {accountOptions}
+        </select>
+        <input type="submit" value="Submit" disabled={disableSubmit} />
+      </form>
     </div>
   )
 }
