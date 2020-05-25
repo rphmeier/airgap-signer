@@ -62,7 +62,11 @@ function InitializedApp() {
       return <ChooseAccount onAccountChosen={onAccountChosen} />
     }
     case AppPhaseKind.ChooseSigningData: {
-      return <p>Choose signing data</p>
+      let onSigningDataChosen = (signingData: Uint8Array) => {
+
+      };
+
+      return <ChooseSigningData account={phase.account} onSigningDataChosen={onSigningDataChosen}/>
     }
     case AppPhaseKind.ViewSigned: {
       return <p>View signature</p>
@@ -125,6 +129,22 @@ function ChooseAccount(props: ChooseAccountProps) {
         </select>
         <input type="submit" value="Submit" disabled={disableSubmit} />
       </form>
+    </div>
+  )
+}
+
+type ChooseDataProps = {
+  account: InjectedAccount,
+  onSigningDataChosen: (_: Uint8Array) => void,
+}
+
+function ChooseSigningData(props: ChooseDataProps) {
+  let [signingData, setSigningData] = useState(undefined as Uint8Array | undefined);
+
+  return (
+    <div>
+      <p>Choose signing data for account {props.account.address}</p>
+      
     </div>
   )
 }
